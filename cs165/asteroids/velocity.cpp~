@@ -1,0 +1,74 @@
+/************************************************************
+ * File: velocity.cpp
+ * Author: Gamaliel Tellez
+ * Description: contains the implementation of the velocity
+ * class
+ ***********************************************************/
+#include "velocity.h"
+
+/************************************************************
+ * File: velocity.cpp
+ * Author: Gamaliel Tellez
+ * Description: contains the implementation of the velocity
+ * class
+ ***********************************************************/
+Velocity::Velocity()
+{}
+
+/************************************************************
+ * File: velocity.cpp
+ * Author: Gamaliel Tellez
+ * Description: contains the implementation of the velocity
+ * class
+ ***********************************************************/
+Velocity::Velocity(float dX, float dY)
+{
+    this-> dX = dX;
+    this-> dY = dY;
+}
+
+/************************************************************
+ * File: velocity.cpp
+ * Author: Gamaliel Tellez
+ * Description: contains the implementation of the velocity
+ * class
+ ***********************************************************/
+float Velocity::getDx()
+{
+   return this-> dX;
+}
+
+/************************************************************
+ * File: velocity.cpp
+ * Author: Gamaliel Tellez
+ * Description: contains the implementation of the velocity
+ * class
+ ***********************************************************/
+float Velocity::getDy()
+{
+   return this-> dY;
+}
+
+/************************************************************
+ * File: velocity.cpp
+ * Author: Gamaliel Tellez
+ * Description: contains the implementation of the velocity
+ * class
+ ***********************************************************/
+void Velocity::setDx(float dX)
+{
+   this-> dX = dX;
+}
+
+/************************************************************
+ * File: velocity.cpp
+ * Author: Gamaliel Tellez
+ * Description: contains the implementation of the velocity
+ * class
+ ***********************************************************/
+void Velocity::setDy(float dY)
+{
+   this-> dY = dY;
+}
+
+

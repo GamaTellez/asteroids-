@@ -1,0 +1,27 @@
+#ifndef ship_h
+#define ship_h
+
+#define SHIP_SIZE 10
+
+#define ROTATE_AMOUNT 6
+#define THRUST_AMOUNT 0.5
+
+#include "flyingObject.h"
+
+class Ship : public FlyingObject
+{
+ private:
+  // int orientation;
+  bool thrust;
+ public:
+  Ship();
+  void advance();
+  void draw();
+  void updateVelocity();
+  
+  bool getThrust() const;
+  void setThrust(bool thrust);
+  Point getDirection() const;
+};
+
+#endif /* ship_h */

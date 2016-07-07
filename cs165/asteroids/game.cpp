@@ -1,0 +1,197 @@
+/*********************************************************************
+ * File: game.cpp
+ * Description: Contains the implementaiton of the game class
+ *  methods.
+ *
+ *********************************************************************/
+
+#include "game.h"
+#include <vector>
+// These are needed for the getClosestDistance function...
+#include <limits>
+#include <algorithm>
+using namespace std;
+
+Game::Game(Point tl, Point br) : topLeft(tl), bottomRight(br)
+{
+  //creatin 5 rocks, I'll probably need to change this when we start creating
+  //other rocks
+   if (bigRocks.empty())
+     {
+       for (int i = 0; i < 5; i++)
+	 {
+	   BigRock* newBigRock = this-> createBigRock();
+	   bigRocks.push_back(this-> createBigRock());  
+	   //	   cout << "new rock was created\n";
+	 }
+     }
+   ship = NULL;
+}
+
+Game::~Game()
+{
+}
+
+void Game::handleInput(const Interface &ui)
+{
+  if (ship-> isAlive())
+    {
+      if (ui.isLeft())
+	{
+	  ship-> setRotation(ship-> getRotation() + 6);
+	}
+      if (ui.isRight())
+	{
+	  ship-> setRotation(ship-> getRotation() - 6);
+	}
+	if (ui.isUp())
+	{
+	  ship-> setThrust(true);
+	  ship-> updateVelocity();
+	}
+      if (ui.isSpace())
+	{
+	  std::cout << "rotation: " << ship-> getRotation() << std::endl;
+	  Bullet* newBullet = this-> createBullet();
+	  //so bullets move ahead of ship when it is moving fast
+	  newBullet-> setVelocity(ship-> getVelocity());
+	  newBullet-> fire(ship-> getPoint(), ship-> getRotation());
+	  bullets.push_back(newBullet);
+	}
+    }
+}
+
+void Game::advance()
+{
+  this-> advanceRocks();
+  this-> advanceShip();
+  this-> advanceBullets();
+}
+
+void Game::advanceRocks()
+{
+  for (vector <BigRock*> :: iterator rocksIt = bigRocks.begin();
+       rocksIt != bigRocks.end(); rocksIt++)
+    {
+      BigRock* pRock = *rocksIt;
+      pRock-> advance();
+      //cout << "advancing rock\n";
+    }
+}
+
+void Game::advanceBullets()
+{
+  for (vector <Bullet*>::iterator bulletsIt = bullets.begin();
+       bulletsIt != bullets.end(); bulletsIt++)
+    {
+      Bullet* aBullet = *bulletsIt;
+      aBullet-> advance();
+    }
+}
+
+
+void Game::advanceShip()
+{
+  if (ship == NULL)
+    {
+      ship = this-> createShip();
+    }
+  else
+    {
+      if (ship-> isAlive())
+	{
+	  ship-> advance();
+	}
+      
+    }
+}
+
+void Game::draw(const Interface &ui)
+{
+  if (!bigRocks.empty())
+    {
+  vector <BigRock*> :: iterator rocksIt = bigRocks.begin();
+  while (rocksIt != bigRocks.end())
+	{
+	  BigRock* pRock = *rocksIt;
+	  pRock-> draw();
+	  *rocksIt++;
+	}
+    }
+  else
+    {
+      cout << "vector is empty\n";
+    }
+
+  if (ship != NULL && ship-> isAlive())
+    ship-> draw();
+
+  if (!bullets.empty())
+    {
+      vector<Bullet*>::iterator bulletIt = bullets.begin();
+      while (bulletIt != bullets.end())
+	{
+	  Bullet* aBullet = *bulletIt;
+	  if(aBullet-> isAlive())
+	     aBullet-> draw();
+	  *bulletIt++;
+	}
+    }
+}
+
+BigRock* Game:: createBigRock()
+{
+  BigRock* newBigRock = NULL;
+  newBigRock = new BigRock();
+  return newBigRock;
+}
+
+Ship* Game::createShip()
+{
+  Ship* pNewShip = NULL;
+  pNewShip = new Ship();
+  return pNewShip;
+}
+
+Bullet* Game::createBullet()
+{
+  Bullet* pNewBullet = NULL;
+  pNewBullet = new Bullet();
+  return pNewBullet;
+}
+
+// You may find this function helpful...
+/**********************************************************
+ * Function: getClosestDistance
+ * Description: Determine how close these two objects will
+ *   get in between the frames.
+ **********************************************************/
+/*
+float Game :: getClosestDistance(const FlyingObject &obj1, const FlyingObject &obj2) const
+{
+   // find the maximum distance traveled
+   float dMax = max(abs(obj1.getVelocity().getDx()), abs(obj1.getVelocity().getDy()));
+   dMax = max(dMax, abs(obj2.getVelocity().getDx()));
+   dMax = max(dMax, abs(obj2.getVelocity().getDy()));
+   dMax = max(dMax, 0.1f); // when dx and dy are 0.0. Go through the loop once.
+   
+   float distMin = std::numeric_limits<float>::max();
+   for (float i = 0.0; i <= dMax; i++)
+   {
+      Point point1(obj1.getPoint().getX() + (obj1.getVelocity().getDx() * i / dMax),
+                     obj1.getPoint().getY() + (obj1.getVelocity().getDy() * i / dMax));
+      Point point2(obj2.getPoint().getX() + (obj2.getVelocity().getDx() * i / dMax),
+                     obj2.getPoint().getY() + (obj2.getVelocity().getDy() * i / dMax));
+      
+      float xDiff = point1.getX() - point2.getX();
+      float yDiff = point1.getY() - point2.getY();
+      
+      float distSquared = (xDiff * xDiff) +(yDiff * yDiff);
+      
+      distMin = min(distMin, distSquared);
+   }
+   
+   return sqrt(distMin);
+}
+*/
+
