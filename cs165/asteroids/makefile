@@ -1,6 +1,6 @@
 ###############################################################
 # Program:
-#     Milestone 10, Asteroids
+#     Milestone 12, Asteroids
 #     Brother McCracken, CS165
 # Author:
 #     Gamaliel Tellez

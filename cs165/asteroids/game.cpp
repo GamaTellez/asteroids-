@@ -26,6 +26,7 @@ Game::Game(Point tl, Point br) : topLeft(tl), bottomRight(br)
 	 }
      }
    ship = NULL;
+   hits = 0;
 }
 
 Game::~Game()
@@ -51,9 +52,7 @@ void Game::handleInput(const Interface &ui)
 	}
       if (ui.isSpace())
 	{
-	  std::cout << "rotation: " << ship-> getRotation() << std::endl;
 	  Bullet* newBullet = this-> createBullet();
-	  //so bullets move ahead of ship when it is moving fast
 	  newBullet-> setVelocity(ship-> getVelocity());
 	  newBullet-> fire(ship-> getPoint(), ship-> getRotation());
 	  bullets.push_back(newBullet);
@@ -66,6 +65,9 @@ void Game::advance()
   this-> advanceRocks();
   this-> advanceShip();
   this-> advanceBullets();
+
+  this-> handleCollisions();
+  this-> cleanUpZombies();
 }
 
 void Game::advanceRocks()
@@ -114,7 +116,8 @@ void Game::draw(const Interface &ui)
   while (rocksIt != bigRocks.end())
 	{
 	  BigRock* pRock = *rocksIt;
-	  pRock-> draw();
+	  if (pRock-> isAlive())
+	    pRock-> draw();
 	  *rocksIt++;
 	}
     }
@@ -139,6 +142,75 @@ void Game::draw(const Interface &ui)
     }
 }
 
+void Game::handleCollisions()
+{
+  vector<Bullet*>::iterator bulletsIt = bullets.begin();
+  vector<BigRock*>::iterator bigRocksIt = bigRocks.begin();
+  while (bulletsIt != bullets.end())
+    {
+      Bullet* bullet = *bulletsIt;
+      if (bullet != NULL && bullet-> isAlive())
+   	{
+   	  while (bigRocksIt != bigRocks.end())
+   	    {
+   	      BigRock* bRock = *bigRocksIt;
+   	      if (this-> getClosestDistance(bullet, bRock) < 15.0)
+		{
+		  bRock-> setAlive(false);
+		  bullet-> setAlive(false);
+		}
+	      bigRocksIt++;
+   	    }
+   	  bulletsIt++;
+   	}
+      else
+	{
+	bulletsIt++;
+	}
+    }
+}
+
+void Game::cleanUpZombies()
+{
+  if (ship != NULL && !ship-> isAlive())
+     {
+       delete ship;
+       ship = NULL;
+     }
+
+  vector<Bullet*>::iterator bulletIt = bullets.begin();
+  //std::cout << "total of bullets: " << bullets.size() << std::endl;
+  while (bulletIt != bullets.end())
+    {
+      Bullet* aBullet = *bulletIt;
+      if (!aBullet-> isAlive())
+	{
+	  delete aBullet;
+	  aBullet = NULL;
+	  bulletIt = bullets.erase(bulletIt);
+	}
+      else
+	  bulletIt++;
+    }
+  //std::cout << "total of bullets: " << bullets.size() << std::endl;
+
+  vector<BigRock*>::iterator bigRockIt = bigRocks.begin();
+  //std::cout << "total of rocks: " << bigRocks.size() << std::endl;
+  while (bigRockIt != bigRocks.end())
+    {
+      BigRock* pBigRock = *bigRockIt;
+      if (!pBigRock-> isAlive())
+	{
+	  delete pBigRock;
+	  pBigRock = NULL;
+	  bigRockIt = bigRocks.erase(bigRockIt);
+	}
+      else
+	bigRockIt++;
+    }
+  //std::cout << "total of bullets: " << bigRocks.size() << std::endl;
+}
+
 BigRock* Game:: createBigRock()
 {
   BigRock* newBigRock = NULL;
@@ -157,6 +229,8 @@ Bullet* Game::createBullet()
 {
   Bullet* pNewBullet = NULL;
   pNewBullet = new Bullet();
+  pNewBullet-> setLife(40);
+  pNewBullet-> setAlive(true);
   return pNewBullet;
 }
 
@@ -166,22 +240,21 @@ Bullet* Game::createBullet()
  * Description: Determine how close these two objects will
  *   get in between the frames.
  **********************************************************/
-/*
-float Game :: getClosestDistance(const FlyingObject &obj1, const FlyingObject &obj2) const
+float Game :: getClosestDistance(const Bullet *obj1, const BigRock *obj2) const
 {
    // find the maximum distance traveled
-   float dMax = max(abs(obj1.getVelocity().getDx()), abs(obj1.getVelocity().getDy()));
-   dMax = max(dMax, abs(obj2.getVelocity().getDx()));
-   dMax = max(dMax, abs(obj2.getVelocity().getDy()));
+   float dMax = max(abs(obj1-> getVelocity().getDx()), abs(obj1-> getVelocity().getDy()));
+   dMax = max(dMax, abs(obj2-> getVelocity().getDx()));
+   dMax = max(dMax, abs(obj2-> getVelocity().getDy()));
    dMax = max(dMax, 0.1f); // when dx and dy are 0.0. Go through the loop once.
    
    float distMin = std::numeric_limits<float>::max();
    for (float i = 0.0; i <= dMax; i++)
    {
-      Point point1(obj1.getPoint().getX() + (obj1.getVelocity().getDx() * i / dMax),
-                     obj1.getPoint().getY() + (obj1.getVelocity().getDy() * i / dMax));
-      Point point2(obj2.getPoint().getX() + (obj2.getVelocity().getDx() * i / dMax),
-                     obj2.getPoint().getY() + (obj2.getVelocity().getDy() * i / dMax));
+      Point point1(obj1-> getPoint().getX() + (obj1-> getVelocity().getDx() * i / dMax),
+                     obj1-> getPoint().getY() + (obj1-> getVelocity().getDy() * i / dMax));
+      Point point2(obj2-> getPoint().getX() + (obj2-> getVelocity().getDx() * i / dMax),
+                     obj2-> getPoint().getY() + (obj2-> getVelocity().getDy() * i / dMax));
       
       float xDiff = point1.getX() - point2.getX();
       float yDiff = point1.getY() - point2.getY();
@@ -193,5 +266,4 @@ float Game :: getClosestDistance(const FlyingObject &obj1, const FlyingObject &o
    
    return sqrt(distMin);
 }
-*/
 

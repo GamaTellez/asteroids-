@@ -20,11 +20,11 @@ class FlyingObject
   
  public:
   FlyingObject();
-  Point getPoint();
-  Velocity getVelocity();
-  float getAngleRads();
-  bool isAlive();
-  int getRotation();
+  Point getPoint() const;
+  Velocity getVelocity() const;
+  float getAngleRads() const;
+  bool isAlive() const;
+  int getRotation() const;
   void setPoint(Point point);
   void setVelocity(Velocity velocity);
   void setAlive(bool alive);

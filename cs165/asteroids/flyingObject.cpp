@@ -17,7 +17,7 @@ FlyingObject::FlyingObject()
  * function: getAnlgeRads()
  * function: getter for the angleRads property.
  ***********************************************************************/
-float FlyingObject::getAngleRads()
+float FlyingObject::getAngleRads() const
 {
   return this-> angleRads;
 }
@@ -26,7 +26,7 @@ float FlyingObject::getAngleRads()
  * function: getPint()
  * function: getter for the point property.
  ***********************************************************************/
-Point FlyingObject::getPoint()
+Point FlyingObject::getPoint() const
 {
   return this-> point;
 }
@@ -35,7 +35,7 @@ Point FlyingObject::getPoint()
  * function: getVelocity()
  * function: getter for the velocity property.
  ***********************************************************************/
-Velocity FlyingObject::getVelocity()
+Velocity FlyingObject::getVelocity() const
 {
   return this-> velocity;
 }
@@ -44,7 +44,7 @@ Velocity FlyingObject::getVelocity()
  * function: getRotation()
  * function: getter for the rotation property.
  ***********************************************************************/
-int FlyingObject::getRotation()
+int FlyingObject::getRotation() const
 {
   return this-> rotation;
 }
@@ -53,7 +53,7 @@ int FlyingObject::getRotation()
  * function: isAlive()
  * function: getter for the alive property.
  ***********************************************************************/
-bool FlyingObject::isAlive()
+bool FlyingObject::isAlive() const
 {
   return this-> alive;
 }

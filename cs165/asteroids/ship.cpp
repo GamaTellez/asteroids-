@@ -1,6 +1,6 @@
 #include "ship.h"
 #include "uiDraw.h"
-
+#include "flyingObject.h"
 Ship::Ship()
 {
   this-> setAlive(true);

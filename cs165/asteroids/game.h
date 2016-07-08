@@ -27,7 +27,6 @@ class Game
   Point topLeft;
   Point bottomRight;
 
-  //vector to hold the rocks
   std::vector<BigRock*> bigRocks; 
   BigRock* createBigRock();
   void advanceRocks();
@@ -39,6 +38,11 @@ class Game
   Ship* ship;
   Ship* createShip();
   void advanceShip();
+
+  void handleCollisions();
+  void cleanUpZombies();
+  float getClosestDistance(const Bullet *obj1,
+			   const BigRock *obj2) const;
 };
 
 #endif /* GAME_H */

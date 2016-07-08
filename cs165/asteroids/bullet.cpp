@@ -7,6 +7,7 @@
 #include "bullet.h"
 #include "point.h"
 #include "uiDraw.h"
+#include "flyingObject.h"
 
 /*************************************************************************
  * Bullet()
@@ -37,21 +38,23 @@ int Bullet::getLife()
  *************************************************************************/
 void Bullet::advance()
 {
-  float newX = this-> getPoint().getX() + this-> getVelocity().getDx();
-  float newY = this-> getPoint().getY() + this-> getVelocity().getDy();
-  if (newX > 200)
-     newX = -200;
-  if (newX < -200)
-     newX = 200;
-  if (newY > 200)
-      newY = -200;
-  if (newY < -200)
-      newY = 200;
-  this-> setPoint(Point(newX, newY));
-  if (this-> getLife() == 0)
+ if (this-> getLife() == 0)
     this-> setAlive(false);
-  else
-    this-> setLife(this-> getLife() - 1);
+ else
+   {
+     this-> setLife(this-> getLife() - 1);
+     float newX = this-> getPoint().getX() + this-> getVelocity().getDx();
+     float newY = this-> getPoint().getY() + this-> getVelocity().getDy();
+     if (newX > 200)
+       newX = -200;
+     if (newX < -200)
+       newX = 200;
+     if (newY > 200)
+       newY = -200;
+     if (newY < -200)
+       newY = 200;
+     this-> setPoint(Point(newX, newY));
+   }
 }
 
 /*************************************************************************
@@ -71,11 +74,11 @@ void Bullet::draw()
 void Bullet::fire(Point point, float angle)
 {
   this-> setPoint(point);
-  std::cout << "rotation: " << angle << std::endl;
+  //std::cout << "rotation: " << angle << std::endl;
   float newDx = cos(this-> degreesToRadians(angle + 90));
-  std::cout << "cosine: " << newDx << std::endl;
+  //std::cout << "cosine: " << newDx << std::endl;
   float newDy = sin(this-> degreesToRadians(angle + 90));
-  std::cout << "sine: " << newDy<< std::endl;
+  //std::cout << "sine: " << newDy<< std::endl;
   Velocity newVelocity = Velocity(this-> getVelocity().getDx() + newDx * 5,
 				  this-> getVelocity().getDy() + newDy * 5);
   this-> setVelocity(Velocity(newVelocity));
