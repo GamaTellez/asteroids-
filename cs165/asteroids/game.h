@@ -27,8 +27,11 @@ class Game
   Point topLeft;
   Point bottomRight;
 
-  std::vector<BigRock*> bigRocks; 
+  std::vector<Rock*> rocks;
+  
   BigRock* createBigRock();
+  MediumRock* createMediumRock(Point point, Velocity velocity);
+  SmallRock* createSmallRock(Point point, Velocity velocity);
   void advanceRocks();
 
   std::vector<Bullet*> bullets;
@@ -41,8 +44,8 @@ class Game
 
   void handleCollisions();
   void cleanUpZombies();
-  float getClosestDistance(const Bullet *obj1,
-			   const BigRock *obj2) const;
+  float getClosestDistance(const FlyingObject *obj1,
+			   const FlyingObject *obj2) const;
 };
 
 #endif /* GAME_H */

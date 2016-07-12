@@ -21,18 +21,45 @@
 
 #include "flyingObject.h"
 
-// Define the following classes here:
-//   Rock
-//   BigRock
-//   MediumRock
-//   SmallRock
-
-class BigRock : public FlyingObject
+class Rock : public FlyingObject
 {
+ private:
+  int radius;
+
+ public:
+  int getRadius() const;
+  void setRadius(int radius);
+  virtual void advance();
+  virtual void draw();
+};
+
+class BigRock : public Rock
+{  
 public:
   BigRock();
   void advance();
   void draw();
+};
+
+
+class MediumRock : public Rock
+{
+ private:
+  int newDirection;
+  
+ public:
+  MediumRock(const Point &point, const Velocity &velocity);
+  void setNewDirection(int direction);
+  void draw();
+  void advance();
+};
+
+class SmallRock : public Rock
+{
+ public:
+  SmallRock(const Point &point, const Velocity &velocity);
+  void draw();
+  void advance();
 };
 
 #endif /* rocks_h */

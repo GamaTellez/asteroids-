@@ -13,7 +13,11 @@
  * Bullet()
  * none defaul constructor
  *************************************************************************/
-Bullet::Bullet(){}
+Bullet::Bullet()
+{
+  this-> setLife(40);
+  this-> setAlive(true);
+}
 
 /*************************************************************************
  * function: setLife()

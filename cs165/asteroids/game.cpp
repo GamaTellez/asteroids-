@@ -10,23 +10,21 @@
 // These are needed for the getClosestDistance function...
 #include <limits>
 #include <algorithm>
+#include "rocks.h"
+
 using namespace std;
 
 Game::Game(Point tl, Point br) : topLeft(tl), bottomRight(br)
 {
-  //creatin 5 rocks, I'll probably need to change this when we start creating
-  //other rocks
-   if (bigRocks.empty())
+   if (rocks.empty())
      {
        for (int i = 0; i < 5; i++)
 	 {
-	   BigRock* newBigRock = this-> createBigRock();
-	   bigRocks.push_back(this-> createBigRock());  
-	   //	   cout << "new rock was created\n";
+	   rocks.push_back(this-> createBigRock());
 	 }
      }
    ship = NULL;
-   hits = 0;
+   rocks.reserve(80);
 }
 
 Game::~Game()
@@ -65,19 +63,18 @@ void Game::advance()
   this-> advanceRocks();
   this-> advanceShip();
   this-> advanceBullets();
-
   this-> handleCollisions();
   this-> cleanUpZombies();
 }
 
 void Game::advanceRocks()
 {
-  for (vector <BigRock*> :: iterator rocksIt = bigRocks.begin();
-       rocksIt != bigRocks.end(); rocksIt++)
+  vector<Rock*>::iterator rocksIt = rocks.begin();
+  while (rocksIt != rocks.end())
     {
-      BigRock* pRock = *rocksIt;
-      pRock-> advance();
-      //cout << "advancing rock\n";
+      Rock* theRock = *rocksIt;
+      theRock-> advance();
+      rocksIt++;
     }
 }
 
@@ -91,7 +88,6 @@ void Game::advanceBullets()
     }
 }
 
-
 void Game::advanceShip()
 {
   if (ship == NULL)
@@ -103,83 +99,102 @@ void Game::advanceShip()
       if (ship-> isAlive())
 	{
 	  ship-> advance();
-	}
-      
+	}    
     }
 }
 
 void Game::draw(const Interface &ui)
-{
-  if (!bigRocks.empty())
-    {
-  vector <BigRock*> :: iterator rocksIt = bigRocks.begin();
-  while (rocksIt != bigRocks.end())
-	{
-	  BigRock* pRock = *rocksIt;
-	  if (pRock-> isAlive())
-	    pRock-> draw();
-	  *rocksIt++;
-	}
-    }
-  else
-    {
-      cout << "vector is empty\n";
-    }
-
+{      
   if (ship != NULL && ship-> isAlive())
     ship-> draw();
+    
+    if (!bullets.empty())
+      {
+	vector<Bullet*>::iterator bulletIt = bullets.begin();
+	while (bulletIt != bullets.end())
+	  {
+	    Bullet* aBullet = *bulletIt;
+	    if(aBullet-> isAlive())
+	      aBullet-> draw();
+	    bulletIt++;
+	  }
+      }
 
-  if (!bullets.empty())
-    {
-      vector<Bullet*>::iterator bulletIt = bullets.begin();
-      while (bulletIt != bullets.end())
-	{
-	  Bullet* aBullet = *bulletIt;
-	  if(aBullet-> isAlive())
-	     aBullet-> draw();
-	  *bulletIt++;
-	}
-    }
+    if (!rocks.empty())
+      {
+	vector<Rock*>::iterator rocksIt =rocks.begin();
+	while (rocksIt != rocks.end())
+	  {
+	    Rock* theRock = *rocksIt;
+	    if (theRock-> isAlive())
+	      theRock-> draw();
+	    rocksIt++;
+	  }
+      }
 }
 
 void Game::handleCollisions()
 {
-  vector<Bullet*>::iterator bulletsIt = bullets.begin();
-  vector<BigRock*>::iterator bigRocksIt = bigRocks.begin();
-  while (bulletsIt != bullets.end())
-    {
-      Bullet* bullet = *bulletsIt;
-      if (bullet != NULL && bullet-> isAlive())
-   	{
-   	  while (bigRocksIt != bigRocks.end())
-   	    {
-   	      BigRock* bRock = *bigRocksIt;
-   	      if (this-> getClosestDistance(bullet, bRock) < 15.0)
-		{
-		  bRock-> setAlive(false);
-		  bullet-> setAlive(false);
-		}
-	      bigRocksIt++;
-   	    }
-   	  bulletsIt++;
-   	}
-      else
+      vector<Rock*>::iterator itRock = rocks.begin();
+      while (itRock != rocks.end())
 	{
-	bulletsIt++;
+	  Rock* aRock = *itRock;
+	  if (this-> getClosestDistance(ship, aRock) <= 20)
+	    ship-> setAlive(false);
+	  itRock++;
+	}
+  
+  if (!bullets.empty())
+    {
+      vector<Rock*>::iterator rocksIt = rocks.begin();
+      vector<Bullet*>::iterator bulletIt = bullets.begin();
+      while (bulletIt != bullets.end())
+	{
+	  Bullet* aBullet = *bulletIt;
+	  while (rocksIt != rocks.end())
+	    {
+	      Rock* theRock = *rocksIt;	   
+	      if (this-> getClosestDistance(aBullet, theRock) <= theRock-> getRadius() + 10)
+		{
+		  theRock-> setAlive(false);
+		  aBullet-> setAlive(false);
+		  int rockRadius = theRock-> getRadius();
+		  switch(rockRadius)
+		    {
+		    case 16:
+		      rocks.push_back(this-> createMediumRock(theRock-> getPoint(), theRock-> getVelocity()));
+		      rocks.push_back(this-> createMediumRock(theRock-> getPoint(),
+							      Velocity(theRock-> getVelocity().getDx() * -1,
+								       theRock-> getVelocity().getDy())));
+		      rocks.push_back(this-> createSmallRock(theRock-> getPoint(), theRock-> getVelocity()));
+		      break;
+		    case 8:
+		      rocks.push_back(this-> createSmallRock(theRock-> getPoint(),
+							     Velocity(theRock-> getVelocity().getDx() * -1,
+								      theRock-> getVelocity().getDy())));
+		      rocks.push_back(this-> createSmallRock(theRock-> getPoint(), theRock-> getVelocity()));
+		      break;  
+		  break;
+		    default:
+		  break;
+		    }
+		}
+	       rocksIt++;
+	    }
+	  bulletIt++;
 	}
     }
 }
 
 void Game::cleanUpZombies()
 {
-  if (ship != NULL && !ship-> isAlive())
-     {
-       delete ship;
-       ship = NULL;
-     }
+   // if (ship != NULL && !ship-> isAlive())
+   //   {
+   //       delete ship;
+   //       ship = NULL;
+   //     }
 
   vector<Bullet*>::iterator bulletIt = bullets.begin();
-  //std::cout << "total of bullets: " << bullets.size() << std::endl;
   while (bulletIt != bullets.end())
     {
       Bullet* aBullet = *bulletIt;
@@ -192,23 +207,20 @@ void Game::cleanUpZombies()
       else
 	  bulletIt++;
     }
-  //std::cout << "total of bullets: " << bullets.size() << std::endl;
-
-  vector<BigRock*>::iterator bigRockIt = bigRocks.begin();
-  //std::cout << "total of rocks: " << bigRocks.size() << std::endl;
-  while (bigRockIt != bigRocks.end())
+ 
+  vector<Rock*>::iterator rocksIt = rocks.begin();
+  while (rocksIt != rocks.end())
     {
-      BigRock* pBigRock = *bigRockIt;
-      if (!pBigRock-> isAlive())
+      Rock *aRock = *rocksIt;
+      if (!aRock-> isAlive())
 	{
-	  delete pBigRock;
-	  pBigRock = NULL;
-	  bigRockIt = bigRocks.erase(bigRockIt);
+	  delete aRock;
+	  aRock = NULL;
+	  rocksIt = rocks.erase(rocksIt);
 	}
       else
-	bigRockIt++;
+	rocksIt++;
     }
-  //std::cout << "total of bullets: " << bigRocks.size() << std::endl;
 }
 
 BigRock* Game:: createBigRock()
@@ -216,6 +228,18 @@ BigRock* Game:: createBigRock()
   BigRock* newBigRock = NULL;
   newBigRock = new BigRock();
   return newBigRock;
+}
+
+MediumRock* Game::createMediumRock(Point point, Velocity velocity)
+{
+  MediumRock* mediumRock = NULL;
+  return new MediumRock(point, velocity);
+}
+
+SmallRock* Game::createSmallRock(Point point, Velocity velocity)
+{
+  SmallRock* sRock = NULL;
+  return new SmallRock(point, velocity);
 }
 
 Ship* Game::createShip()
@@ -229,8 +253,6 @@ Bullet* Game::createBullet()
 {
   Bullet* pNewBullet = NULL;
   pNewBullet = new Bullet();
-  pNewBullet-> setLife(40);
-  pNewBullet-> setAlive(true);
   return pNewBullet;
 }
 
@@ -240,7 +262,7 @@ Bullet* Game::createBullet()
  * Description: Determine how close these two objects will
  *   get in between the frames.
  **********************************************************/
-float Game :: getClosestDistance(const Bullet *obj1, const BigRock *obj2) const
+float Game :: getClosestDistance(const FlyingObject *obj1, const FlyingObject *obj2) const
 {
    // find the maximum distance traveled
    float dMax = max(abs(obj1-> getVelocity().getDx()), abs(obj1-> getVelocity().getDy()));
